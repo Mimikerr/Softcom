@@ -21,6 +21,10 @@ import com.example.softcom.R
 import com.example.softcom.data.model.Product
 import com.softcom.utils.SampleData
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.ui.text.style.TextDecoration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,11 +35,18 @@ fun HomeScreen(onProductClick: (Product) -> Unit) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Pet Friends Accessories",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
-                    )
+                    Column {
+                        Text(
+                            text = "Pet Friends Accessories",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                        SearchBar(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = Color(0xFFFF5722))
             )
@@ -45,28 +56,43 @@ fun HomeScreen(onProductClick: (Product) -> Unit) {
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Barra de pesquisa
-            SearchBar()
-
             // Categorias
             CategoriesSection()
 
             // Produtos por categoria
             LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
             ) {
                 productsByCategory.forEach { (category, products) ->
                     item {
                         Text(
                             text = category,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
-                    items(products) { product ->
-                        ProductCard(product = product, onClick = { onProductClick(product) })
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp) // Limita a altura do LazyVerticalGrid
+                        ) {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(8.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(products) { product ->
+                                    ProductCard(
+                                        product = product,
+                                        onClick = { onProductClick(product) }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -75,28 +101,29 @@ fun HomeScreen(onProductClick: (Product) -> Unit) {
 }
 
 @Composable
-fun SearchBar() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(Color(0xFFEEEEEE), shape = RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 8.dp)
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_search), // Ícone de busca
-            contentDescription = "Search Icon",
-            tint = Color.Gray,
-            modifier = Modifier.size(20.dp) // Ajuste o tamanho aqui (exemplo: 20.dp)
+fun SearchBar(modifier: Modifier = Modifier) {
+    TextField(
+        value = "",
+        onValueChange = {},
+        placeholder = {
+            Text(text = "O que você procura?")
+        },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_search),
+                contentDescription = "Buscar"
+            )
+        },
+        modifier = modifier
+            .background(Color.White, shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "O que você procura?",
-            color = Color.Gray,
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
+    )
 }
 
 
@@ -104,12 +131,11 @@ fun SearchBar() {
 @Composable
 fun CategoriesSection() {
     val categories = listOf(
-        "Camas" to R.drawable.ic_cama, // Substitua pelos seus ícones reais
+        "Camas" to R.drawable.ic_cama, // Substitua pelo nome do arquivo em drawable
         "Brinquedos" to R.drawable.ic_brinquedos,
         "Comedouros" to R.drawable.ic_comedouro,
         "Casinhas" to R.drawable.ic_casa
     )
-
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
@@ -125,10 +151,10 @@ fun CategoriesSection() {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = iconRes), // Ícone específico
-                        contentDescription = "$category icon",
+                        painter = painterResource(id = iconRes), // Ícone específico da categoria
+                        contentDescription = category,
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp) // Aqui o tamanho do ícone é ajustado
                     )
                 }
                 Text(
@@ -144,42 +170,66 @@ fun CategoriesSection() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun ProductSection(category: String, products: List<Product>, onProductClick: (Product) -> Unit) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(
+            text = category,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2), // Define 2 colunas para os itens
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(products) { product ->
+                ProductCard(
+                    product = product,
+                    onClick = { onProductClick(product) }
+                )
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun ProductCard(product: Product, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .aspectRatio(0.6f) // Mantém os cards quadrados
+            .padding(1.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Correção aqui
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(modifier = Modifier.padding(16.dp)) {
-            // Exibir a imagem do produto
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_placeholder), // Substitua pelo recurso da imagem correta
+                painter = painterResource(id = product.imageRes),
                 contentDescription = product.name,
                 modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 16.dp)
+                    .size(250.dp) // Ajusta o tamanho da imagem
+                    .padding(bottom = 2.dp)
             )
-
-            Column {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                if (product.originalPrice != null) {
-                    Text(
-                        text = "De R$ ${"%.2f".format(product.originalPrice)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
-                }
-                Text(
-                    text = "Por R$ ${"%.2f".format(product.price)}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            Text(text = product.name, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "De R$ ${product.originalPrice}",
+                style = MaterialTheme.typography.bodySmall,
+                textDecoration = TextDecoration.LineThrough,
+                color = Color.Gray
+            )
+            Text(
+                text = "Por R$ ${product.price}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Green
+            )
         }
     }
 }
@@ -190,23 +240,40 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
 fun BottomNavigationBar() {
     NavigationBar {
         NavigationBarItem(
-            icon = { Icon(painterResource(R.drawable.ic_home),modifier = Modifier.size(20.dp), contentDescription = "Home") },
-            label = { Text("Home") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_home), // Substitua pelo nome correto do seu ícone
+                    contentDescription = "Home",
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            label = { Text(text = "Home") },
             selected = true,
-            onClick = { /* Navegar para Home */ }
+            onClick = { }
         )
         NavigationBarItem(
-            icon = { Icon(painterResource(R.drawable.ic_orders),modifier = Modifier.size(20.dp), contentDescription = "Pedidos") },
-            label = { Text("Pedidos") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_orders), // Substitua pelo nome correto do seu ícone
+                    contentDescription = "Pedidos",
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            label = { Text(text = "Pedidos") },
             selected = false,
-            onClick = { /* Navegar para Pedidos */ }
+            onClick = { }
         )
         NavigationBarItem(
-            icon = { Icon(painterResource(R.drawable.ic_more),modifier = Modifier.size(20.dp), contentDescription = "Mais") },
-            label = { Text("Mais") },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_more), // Substitua pelo nome correto do seu ícone
+                    contentDescription = "Mais",
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            label = { Text(text = "Mais") },
             selected = false,
-            onClick = { /* Navegar para Mais */ }
+            onClick = { }
         )
     }
 }
-
