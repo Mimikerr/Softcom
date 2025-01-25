@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+    android:theme="@style/Theme.Softcom"
     android:label="@string/app_name"
     android:icon="@mipmap/ic_launcher">
     <activity 
@@ -14,7 +15,5 @@
         </intent-filter>
     </activity>
 </application>
-
-
 
 </manifest>

@@ -60,6 +60,8 @@ dependencies {
     implementation ("androidx.compose.material:material:1.6.0")
     implementation(libs.androidx.material3.android)
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.0")
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+
 
     // Navegação no Compose
     implementation("androidx.navigation:navigation-compose:2.7.2")
