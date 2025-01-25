@@ -81,8 +81,8 @@ fun HomeScreen(onProductClick: (Product) -> Unit) {
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(2),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                contentPadding = PaddingValues(4.dp),
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items(products) { product ->

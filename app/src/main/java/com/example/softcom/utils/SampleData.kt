@@ -23,7 +23,17 @@ object SampleData {
                 originalPrice = 150.60,
                 imageRes = R.drawable.produto1,
                 category = "Camas"
-            )
+            ),
+
+            Product(
+                id = 5,
+                name = "Cama para pet",
+                description = "Cama quadrada perfeita para seu pet descansar.",
+                price = 130.60,
+                originalPrice = 150.60,
+                imageRes = R.drawable.produto3,
+                category = "Camas"
+            )            
         ),
         "Brinquedos" to listOf(
             Product(
