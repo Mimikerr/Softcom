@@ -76,42 +76,47 @@ fun HomeScreen(onProductClick: (Product) -> Unit) {
 
 @Composable
 fun SearchBar() {
-    TextField(
-        value = "",
-        onValueChange = {},
-        placeholder = { Text(text = "O que você procura?") },
-        leadingIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = "Search Icon"
-            )
-        },
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xFFF1F1F1),
-            focusedContainerColor = Color(0xFFF1F1F1),
-            cursorColor = Color(0xFF000000),
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent
-        ),
-        shape = RoundedCornerShape(8.dp)
-    )
+            .padding(16.dp)
+            .background(Color(0xFFEEEEEE), shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_search), // Ícone de busca
+            contentDescription = "Search Icon",
+            tint = Color.Gray,
+            modifier = Modifier.size(20.dp) // Ajuste o tamanho aqui (exemplo: 20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "O que você procura?",
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }
 
 
 
 @Composable
 fun CategoriesSection() {
-    val categories = listOf("Camas", "Brinquedos", "Comedouros", "Casinhas")
+    val categories = listOf(
+        "Camas" to R.drawable.ic_cama, // Substitua pelos seus ícones reais
+        "Brinquedos" to R.drawable.ic_brinquedos,
+        "Comedouros" to R.drawable.ic_comedouro,
+        "Casinhas" to R.drawable.ic_casa
+    )
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
     ) {
-        categories.forEach { category ->
+        categories.forEach { (category, iconRes) ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     modifier = Modifier
@@ -120,16 +125,22 @@ fun CategoriesSection() {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_placeholder), // Ícones específicos
-                        contentDescription = null,
-                        tint = Color.White
+                        painter = painterResource(id = iconRes), // Ícone específico
+                        contentDescription = "$category icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
-                Text(text = category, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(
+                    text = category,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,61 +148,65 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .padding(8.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Correção aqui
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
+            // Exibir a imagem do produto
             Image(
-                painter = painterResource(id = R.drawable.ic_placeholder), // Substituir com imagens reais
+                painter = painterResource(id = R.drawable.ic_placeholder), // Substitua pelo recurso da imagem correta
                 contentDescription = product.name,
                 modifier = Modifier
                     .size(80.dp)
-                    .background(Color.Gray, RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
+                    .padding(end = 16.dp)
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxHeight()
-            ) {
+
+            Column {
                 Text(
                     text = product.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.bodyMedium
                 )
+                if (product.originalPrice != null) {
+                    Text(
+                        text = "De R$ ${"%.2f".format(product.originalPrice)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
                 Text(
-                    text = "De R$ ${product.originalPrice} Por R$ ${product.price}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF4CAF50),
-                    fontWeight = FontWeight.Bold
+                    text = "Por R$ ${"%.2f".format(product.price)}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
     }
 }
 
+
+
 @Composable
 fun BottomNavigationBar() {
     NavigationBar {
         NavigationBarItem(
-            icon = { Icon(painter = painterResource(id = R.drawable.ic_home), contentDescription = "Home") },
+            icon = { Icon(painterResource(R.drawable.ic_home),modifier = Modifier.size(20.dp), contentDescription = "Home") },
             label = { Text("Home") },
             selected = true,
-            onClick = {}
+            onClick = { /* Navegar para Home */ }
         )
         NavigationBarItem(
-            icon = { Icon(painter = painterResource(id = R.drawable.ic_orders), contentDescription = "Pedidos") },
+            icon = { Icon(painterResource(R.drawable.ic_orders),modifier = Modifier.size(20.dp), contentDescription = "Pedidos") },
             label = { Text("Pedidos") },
             selected = false,
-            onClick = {}
+            onClick = { /* Navegar para Pedidos */ }
         )
         NavigationBarItem(
-            icon = { Icon(painter = painterResource(id = R.drawable.ic_more), contentDescription = "Mais") },
+            icon = { Icon(painterResource(R.drawable.ic_more),modifier = Modifier.size(20.dp), contentDescription = "Mais") },
             label = { Text("Mais") },
             selected = false,
-            onClick = {}
+            onClick = { /* Navegar para Mais */ }
         )
     }
 }
+
