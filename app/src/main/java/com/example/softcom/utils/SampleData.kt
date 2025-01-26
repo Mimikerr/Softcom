@@ -20,7 +20,6 @@ object SampleData {
                 name = "Cama Luppet Quadrada Azul",
                 description = "Cama quadrada perfeita para seu pet descansar.",
                 price = 130.60,
-                originalPrice = 150.60,
                 imageRes = R.drawable.produto1,
                 category = "Camas"
             ),
@@ -50,7 +49,6 @@ object SampleData {
                 name = "Brinquedo Pelúcia Macaco",
                 description = "Pelúcia em forma de macaco, ideal para brincar.",
                 price = 20.00,
-                originalPrice = 25.00,
                 imageRes = R.drawable.produto5,
                 category = "Brinquedos"
             )

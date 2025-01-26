@@ -35,6 +35,15 @@ android {
         }
     }
 
+    packagingOptions {
+        resources {
+            excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+        }
+    }
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -59,8 +68,11 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation ("androidx.compose.material:material:1.6.0")
     implementation(libs.androidx.material3.android)
+    implementation(libs.identity.doctypes.jvm)
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.0")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.0")
+
 
 
     // Navegação no Compose

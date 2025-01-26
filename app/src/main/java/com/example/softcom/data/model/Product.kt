@@ -10,6 +10,6 @@ data class Product(
     val description: String,
     val price: Double,
     val imageRes: Int,
-    val originalPrice: Double?,
+    val originalPrice: Double? = null,
     val category: String
 )

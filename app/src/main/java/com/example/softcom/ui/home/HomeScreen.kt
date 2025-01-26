@@ -122,7 +122,8 @@ fun SearchBar(modifier: Modifier = Modifier) {
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = "Buscar"
+                contentDescription = "Buscar",
+                modifier = Modifier.height(150.dp)
             )
         },
         modifier = modifier
@@ -216,7 +217,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             .clickable { onClick() }
             .border(
                 width = 1.dp,
-                color = Color.LightGray,
+                color = Color.White,
                 shape = RoundedCornerShape(8.dp) // Cantos arredondados na borda
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Corrigido
@@ -231,7 +232,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                     .size(250.dp)
                     .border(
                         width = 1.dp,
-                        color = Color.LightGray,
+                        color = Color.White,
                         shape = RoundedCornerShape(8.dp) // Borda arredondada ao redor da imagem
                     ),
                 contentAlignment = Alignment.Center
@@ -244,6 +245,8 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                 )
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Nome do Produto
             Text(
                 text = product.name,
@@ -255,12 +258,15 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             Column(modifier = Modifier.padding(top = 4.dp)) {
                 if (product.originalPrice != null) {
                     Text(
-                        text = "De R$ ${product.originalPrice}",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            textDecoration = TextDecoration.LineThrough
-                        ),
-                        color = Color.Gray
+                        text = "${((1 - (product.price / product.originalPrice)) * 100).toInt()}% OFF",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .background(Color(0xFF4CAF50), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
+                }else {
+                    Spacer(modifier = Modifier.height(30.dp)) // Espaço reservado
                 }
                 Text(
                     text = "Por R$ ${product.price}",
