@@ -28,16 +28,27 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavHostController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onProductClick: (Product) -> Unit) {
+fun HomeScreen(navController: NavHostController, onProductClick: (Product) -> Unit) {
+    // Estado para armazenar a categoria selecionada
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
     val productsByCategory = SampleData.productsByCategory
+    val filteredProducts = selectedCategory?.let { category ->
+        mapOf(category to productsByCategory[category].orEmpty())
+    } ?: productsByCategory // Se nenhuma categoria for selecionada, mostre todos os produtos.
+
     val systemUiController = rememberSystemUiController()
-    
     SideEffect {
         systemUiController.setSystemBarsColor(
             color = Color(0xFFFF5722),
@@ -71,17 +82,25 @@ fun HomeScreen(onProductClick: (Product) -> Unit) {
             )
         },
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(navController = navController)
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            CategoriesSection()
+            // Categorias com clique
+            CategoriesSection(
+                categories = productsByCategory.keys.toList(),
+                selectedCategory = selectedCategory,
+                onCategoryClick = { category ->
+                    selectedCategory = if (selectedCategory == category) null else category
+                }
+            )
 
+            // Produtos filtrados por categoria
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp)
             ) {
-                productsByCategory.forEach { (category, products) ->
+                filteredProducts.forEach { (category, products) ->
                     item {
                         Text(
                             text = category,
@@ -141,13 +160,18 @@ fun SearchBar(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun CategoriesSection() {
+fun CategoriesSection(
+    categories: List<String>, 
+    selectedCategory: String?,
+    onCategoryClick: (String) -> Unit
+) {
     val categories = listOf(
         "Camas" to R.drawable.ic_cama,
         "Brinquedos" to R.drawable.ic_brinquedos,
         "Comedouros" to R.drawable.ic_comedouro,
         "Casinhas" to R.drawable.ic_casa
     )
+    
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
@@ -159,25 +183,31 @@ fun CategoriesSection() {
                 Box(
                     modifier = Modifier
                         .size(60.dp)
-                        .background(Color(0xFFFF5722), CircleShape),
+                        .background(
+                            if (selectedCategory == category) Color.LightGray else Color(0xFFFF5722),
+                            CircleShape
+                        )
+                        .clickable { onCategoryClick(category) },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(id = iconRes),
                         contentDescription = category,
-                        tint = Color.White,
+                        tint = if (selectedCategory == category) Color.Black else Color.White,
                         modifier = Modifier.size(32.dp)
                     )
                 }
                 Text(
                     text = category,
                     fontSize = 12.sp,
+                    color = if (selectedCategory == category) Color(0xFFFF5722) else Color.Black,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
     }
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -282,7 +312,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
 
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavHostController) {
     NavigationBar {
         NavigationBarItem(
             icon = {
@@ -292,33 +322,26 @@ fun BottomNavigationBar() {
                     modifier = Modifier.size(18.dp)
                 )
             },
-            label = { Text(text = "Home") },
-            selected = true,
-            onClick = { }
+            label = { Text("Home") },
+            selected = false, // Adicione lógica de seleção com base na rota atual
+            onClick = {
+                navController.navigate("home") // Navegar para a tela Home
+            }
         )
+
         NavigationBarItem(
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_orders),
-                    contentDescription = "Pedidos",
+                    contentDescription = "Carrinho",
                     modifier = Modifier.size(18.dp)
                 )
             },
-            label = { Text(text = "Pedidos") },
+            label = { Text("Pedidos") },
             selected = false,
-            onClick = { }
-        )
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_more),
-                    contentDescription = "Mais",
-                    modifier = Modifier.size(18.dp)
-                )
-            },
-            label = { Text(text = "Mais") },
-            selected = false,
-            onClick = { }
+            onClick = {
+                navController.navigate("cart") // Navegar para a tela do carrinho
+            }
         )
     }
 }

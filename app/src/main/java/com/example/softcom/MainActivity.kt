@@ -1,5 +1,7 @@
 package com.example.softcom
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,45 +12,49 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import androidx.compose.runtime.Composable
-import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.room.Room
 import com.example.softcom.data.database.AppDatabase
-import com.example.softcom.data.model.Product
+import com.example.softcom.data.model.CartItem
+import com.example.softcom.ui.cart.CartScreen
 import com.example.softcom.ui.home.HomeScreen
 import com.example.softcom.ui.product.ProductDetailsScreen
 import com.softcom.utils.SampleData
 
-
-
-
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar banco de dados
-        DatabaseInstance.init(this)
-
         setContent {
+            // Declare explicitamente o tipo de `currentCartItems`
+            val currentCartItems: SnapshotStateList<CartItem> = mutableStateListOf()
             val navController = rememberNavController()
-            AppNavHost(navController = navController)
+            AppNavHost(navController = navController, currentCartItems = currentCartItems)
         }
     }
 }
 
+@SuppressLint("RememberReturnType")
 @Composable
-fun AppNavHost(navController: NavHostController) {
+fun AppNavHost(navController: NavHostController, currentCartItems: SnapshotStateList<CartItem>) {
     NavHost(
         navController = navController,
         startDestination = "home"
     ) {
         // Tela Home
         composable("home") {
-            HomeScreen { product ->
-                navController.navigate("productDetails/${product.id}")
-            }
+            HomeScreen(
+                navController = navController, // Passa o NavController
+                onProductClick = { product ->
+                    navController.navigate("productDetails/${product.id}")
+                }
+            )
         }
 
-        // Tela de Detalhes do Produto
+        // Tela de detalhes do produto
         composable(
             route = "productDetails/{productId}",
             arguments = listOf(navArgument("productId") { type = NavType.IntType })
@@ -57,19 +63,42 @@ fun AppNavHost(navController: NavHostController) {
             val product = SampleData.productsByCategory.values.flatten()
                 .firstOrNull { it.id == productId }
 
-            if (product != null) {
+            product?.let {
                 ProductDetailsScreen(
                     product = product,
                     onBackClick = { navController.popBackStack() },
-                    onAddToCart = { _, _, _ -> /* Lógica do carrinho */ }
+                    onAddToCart = { addedProduct, quantity, observation ->
+                        val existingItem = currentCartItems.find {
+                            it.product.id == addedProduct.id && it.observation == observation
+                        }
+                        if (existingItem != null) {
+                            val updatedItem = existingItem.copy(quantity = existingItem.quantity + quantity)
+                            currentCartItems[currentCartItems.indexOf(existingItem)] = updatedItem
+                        } else {
+                            val newItem = CartItem(
+                                product = addedProduct,
+                                quantity = quantity,
+                                observation = observation
+                            )
+                            currentCartItems.add(newItem)
+                        }
+                    }
                 )
-            } else {
-                // Caso o produto não seja encontrado, volte para a tela inicial
-                navController.popBackStack()
-            }
+            } ?: navController.popBackStack()
+        }
+
+        // Tela do carrinho
+        composable("cart") {
+            CartScreen(
+                cartItems = currentCartItems,
+                onBackClick = { navController.popBackStack() },
+                onCheckout = { /* Implementar lógica de finalização da compra */ }
+            )
         }
     }
 }
+
+
 
 object DatabaseInstance {
     lateinit var database: AppDatabase

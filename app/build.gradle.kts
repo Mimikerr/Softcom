@@ -42,6 +42,8 @@ android {
             excludes.add("META-INF/LICENSE.txt")
             excludes.add("META-INF/NOTICE")
             excludes.add("META-INF/NOTICE.txt")
+           
+            
         }
     }
     kotlinOptions {
